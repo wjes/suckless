@@ -6,6 +6,7 @@ static const unsigned int borderpx  = 1;        /* border pixel of windows */
 static const unsigned int snap      = 32;       /* snap pixel */
 static const int showbar            = 1;        /* 0 means no bar */
 static const int topbar             = 1;        /* 0 means bottom bar */
+static const int focusonwheel       = 0;
 static const char *fonts[]          = { "monospace:size=10" };
 static const char dmenufont[]       = "monospace:size=10";
 
@@ -37,7 +38,7 @@ static const char *colors[][3]      = {
 };
 
 /* tagging */
-static const char *tags[] = { "", "", "", "", "", "", "" };
+static const char *tags[] = { "", "", "", "", "", "", "" };
 
 static const Rule rules[] = {
 	/* xprop(1):
@@ -57,9 +58,9 @@ static const int lockfullscreen = 1; /* 1 will force focus on the fullscreen win
 
 static const Layout layouts[] = {
 	/* symbol     arrange function */
-    { "T",      tile },    /* first entry is default */
-    { "F",      NULL },    /* no layout function means floating behavior */
-    { "M",      monocle },
+    { "﩯",      tile },    /* first entry is default */
+    { "ﱢ",      NULL },    /* no layout function means floating behavior */
+    { "",      monocle },
 };
 
 /* key definitions */
@@ -76,7 +77,8 @@ static const Layout layouts[] = {
 /* commands */
 static const char *dmenucmd[] = { "dmenu_run", "-fn", dmenufont, "-nb", nord0, "-nf", nord4, "-sb", nord3, "-sf", nord5, NULL };
 static const char *termcmd[]  = { "st", NULL };
-static const char *mutecmd[] = { "pactl", "set-sink-mute", "0", "toggle", NULL };
+static const char *mutevolcmd[] = { "pactl", "set-sink-mute", "0", "toggle", NULL };
+static const char *mutemiccmd[] = { "pactl", "set-source-mute", "@DEFAULT_SOURCE@", "toggle", NULL };
 static const char *volupcmd[] = { "pactl", "set-sink-volume", "0", "+5%", NULL };
 static const char *voldowncmd[] = { "pactl", "set-sink-volume", "0", "-5%", NULL };
 static const char *brupcmd[] = { "sudo", "light", "-A", "10", NULL };
@@ -117,11 +119,12 @@ static const Key keys[] = {
     TAGKEYS(            XK_8,                                       7)
     TAGKEYS(            XK_9,                                       8)
     { MODKEY|Mod1Mask,  XK_Delete,                  quit,           {0} },
-    { 0,                XF86XK_AudioMute,           spawn,          {.v = mutecmd } },
+    { 0,                XF86XK_AudioMute,           spawn,          {.v = mutevolcmd } },
+    { 0,                XF86XK_AudioMicMute,        spawn,          {.v = mutemiccmd } },
     { 0,                XF86XK_AudioLowerVolume,    spawn,          {.v = voldowncmd } },
     { 0,                XF86XK_AudioRaiseVolume,    spawn,          {.v = volupcmd } },
     { 0,                XF86XK_MonBrightnessUp,     spawn,          {.v = brupcmd} },
-    { 0,                XF86XK_MonBrightnessDown,   spawn,          {.v = brdowncmd} },
+    { 0,                XF86XK_MonBrightnessDown,   spawn,          {.v = brdowncmd } },
 };
 
 /* button definitions */
