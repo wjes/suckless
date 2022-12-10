@@ -38,7 +38,11 @@ static const char *colors[][3]      = {
 };
 
 /* tagging */
-static const char *tags[] = { "", "", "", "", "", "", "" };
+static const char *tags[3][9] = {
+    [NoWindows] = { "▢", "▢", "▢", "▢", "▢", "▢", "▢", "▢", "▢" },
+    [ActiveWindow] = {  "▣", "▣", "▣", "▣", "▣", "▣", "▣", "▣", "▣" },
+    [InactiveWindows] = { "▧", "▧", "▧", "▧", "▧", "▧", "▧", "▧", "▧" },
+ };
 
 static const Rule rules[] = {
 	/* xprop(1):
@@ -46,7 +50,8 @@ static const Rule rules[] = {
 	 *	WM_NAME(STRING) = title
 	 */
 	/* class      instance    title       tags mask     isfloating   monitor */
-	{ "Gimp",     NULL,       NULL,       0,            1,           -1 },
+	// { "Gimp",     NULL,       NULL,       0,            1,           -1 },
+	// { "Teams",    NULL,       NULL,       0,            1,           -1 },
 	{ "Firefox",  NULL,       NULL,       1 << 8,       0,           -1 },
 };
 
@@ -67,9 +72,9 @@ static const Layout layouts[] = {
 #define MODKEY Mod4Mask
 #define TAGKEYS(KEY,TAG) \
 	{ MODKEY,                       KEY,      view,           {.ui = 1 << TAG} }, \
-	{ MODKEY|ControlMask,           KEY,      toggleview,     {.ui = 1 << TAG} }, \
+	{ MODKEY|Mod1Mask,              KEY,      toggleview,     {.ui = 1 << TAG} }, \
 	{ MODKEY|ShiftMask,             KEY,      tag,            {.ui = 1 << TAG} }, \
-	{ MODKEY|ControlMask|ShiftMask, KEY,      toggletag,      {.ui = 1 << TAG} },
+	{ MODKEY|Mod1Mask|ShiftMask,    KEY,      toggletag,      {.ui = 1 << TAG} },
 
 /* helper for spawning shell commands in the pre dwm-5.0 fashion */
 #define SHCMD(cmd) { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
@@ -77,16 +82,18 @@ static const Layout layouts[] = {
 /* commands */
 static const char *dmenucmd[] = { "dmenu_run", "-fn", dmenufont, "-nb", nord0, "-nf", nord4, "-sb", nord3, "-sf", nord5, NULL };
 static const char *termcmd[]  = { "st", NULL };
-static const char *mutevolcmd[] = { "pactl", "set-sink-mute", "0", "toggle", NULL };
+static const char *waterfoxcmd[]  = { "waterfox", NULL };
+static const char *mutevolcmd[] = { "pactl", "set-sink-mute", "1", "toggle", NULL };
 static const char *mutemiccmd[] = { "pactl", "set-source-mute", "@DEFAULT_SOURCE@", "toggle", NULL };
-static const char *volupcmd[] = { "pactl", "set-sink-volume", "0", "+5%", NULL };
-static const char *voldowncmd[] = { "pactl", "set-sink-volume", "0", "-5%", NULL };
+static const char *volupcmd[] = { "pactl", "set-sink-volume", "1", "+5%", NULL };
+static const char *voldowncmd[] = { "pactl", "set-sink-volume", "1", "-5%", NULL };
 static const char *brupcmd[] = { "sudo", "light", "-A", "10", NULL };
 static const char *brdowncmd[] = { "sudo", "light", "-U", "10", NULL };
 
 static const Key keys[] = {
     /* modifier         key                         function        argument */
     { MODKEY,           XK_p,                       spawn,          {.v = dmenucmd } },
+    { MODKEY,           XK_w,                       spawn,          {.v = waterfoxcmd } },
     { MODKEY,           XK_Return,                  spawn,          {.v = termcmd } },
     { MODKEY,           XK_b,                       togglebar,      {0} },
     { MODKEY,           XK_j,                       focusstack,     {.i = +1 } },

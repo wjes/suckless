@@ -20,6 +20,7 @@
  *
  * To understand everything else, start reading main().
  */
+#include <stdbool.h>
 #include <errno.h>
 #include <locale.h>
 #include <signal.h>
@@ -54,7 +55,7 @@
 #define MOUSEMASK               (BUTTONMASK|PointerMotionMask)
 #define WIDTH(X)                ((X)->w + 2 * (X)->bw)
 #define HEIGHT(X)               ((X)->h + 2 * (X)->bw)
-#define TAGMASK                 ((1 << LENGTH(tags)) - 1)
+#define TAGMASK                 ((1 << LENGTH(tags[NoWindows])) - 1)
 #define TEXTW(X)                (drw_fontset_getwidth(drw, (X)) + lrpad)
 
 /* enums */
@@ -66,6 +67,7 @@ enum { NetSupported, NetWMName, NetWMState, NetWMCheck,
 enum { WMProtocols, WMDelete, WMState, WMTakeFocus, WMLast }; /* default atoms */
 enum { ClkTagBar, ClkLtSymbol, ClkStatusText, ClkWinTitle,
        ClkClientWin, ClkRootWin, ClkLast }; /* clicks */
+enum { NoWindows, ActiveWindow, InactiveWindows }; /* tags symbols */
 
 typedef union {
 	int i;
@@ -273,7 +275,7 @@ static Window root, wmcheckwin;
 #include "config.h"
 
 /* compile-time check if all tags fit into an unsigned int bit array. */
-struct NumTags { char limitexceeded[LENGTH(tags) > 31 ? -1 : 1]; };
+struct NumTags { char limitexceeded[LENGTH(tags[NoWindows]) > 31 ? -1 : 1]; };
 
 /* function implementations */
 void
@@ -437,9 +439,9 @@ buttonpress(XEvent *e)
 	if (ev->window == selmon->barwin) {
 		i = x = 0;
 		do
-			x += TEXTW(tags[i]);
-		while (ev->x >= x && ++i < LENGTH(tags));
-		if (i < LENGTH(tags)) {
+			x += TEXTW(tags[NoWindows][i]);
+		while (ev->x >= x && ++i < LENGTH(tags[NoWindows]));
+		if (i < LENGTH(tags[NoWindows])) {
 			click = ClkTagBar;
 			arg.ui = 1 << i;
 		} else if (ev->x < x + TEXTW(selmon->ltsymbol))
@@ -716,7 +718,7 @@ drawbar(Monitor *m)
 	if (m == selmon) { /* status is only drawn on selected monitor */
 		drw_setscheme(drw, scheme[SchemeNorm]);
 		tw = TEXTW(stext) - lrpad + 2; /* 2px right padding */
-		drw_text(drw, m->ww - tw, 0, tw, bh, 0, stext, 0);
+		drw_text(drw, m->ww - tw, 1, tw, bh, 0, stext, 0);
 	}
 
 	for (c = m->clients; c; c = c->next) {
@@ -725,14 +727,20 @@ drawbar(Monitor *m)
 			urg |= c->tags;
 	}
 	x = 0;
-	for (i = 0; i < LENGTH(tags); i++) {
-		w = TEXTW(tags[i]);
-		drw_setscheme(drw, scheme[m->tagset[m->seltags] & 1 << i ? SchemeSel : SchemeNorm]);
-		drw_text(drw, x, 0, w, bh, lrpad / 2, tags[i], urg & 1 << i);
-		if (occ & 1 << i)
-			drw_rect(drw, x + boxs, boxs, boxw, boxw,
-				m == selmon && selmon->sel && selmon->sel->tags & 1 << i,
-				urg & 1 << i);
+	for (i = 0; i < LENGTH(tags[NoWindows]); i++) {
+		bool is_active_tag = m->tagset[m->seltags] & 1 << i;
+        bool is_any_window_open = occ & 1 << i;
+        bool is_window_active_in_active_tag = is_any_window_open && m == selmon && selmon->sel && selmon->sel->tags & 1 << i;
+        const char *tag = tags[ is_window_active_in_active_tag ? ActiveWindow : is_any_window_open ? InactiveWindows : NoWindows][i];
+        w = TEXTW(tag);
+        drw_setscheme(drw, scheme[is_active_tag ? SchemeSel : SchemeNorm]);
+		//drw_text(drw, x, 0, w, bh, lrpad / 2, tag, urg & 1 << i);
+		drw_text(drw, x, 0, w, bh, lrpad / 2, tag, 0);
+
+		//if (is_any_window_open)
+		//	drw_rect(drw, x + boxs, boxs, boxw, boxw,
+	    //	    is_window_active_in_active_tag,
+	    //		urg & 1 << i);
 		x += w;
 	}
 
@@ -750,9 +758,9 @@ drawbar(Monitor *m)
 	if ((w = m->ww - tw - x) > bh) {
 		// drw_setscheme(drw, scheme[SchemeNorm]);
 		if (m->sel) {
-			drw_text(drw, x, 0, w, bh, lrpad / 2, m->sel->name, 0);
-			if (m->sel->isfloating)
-				drw_rect(drw, x + boxs, boxs, boxw, boxw, m->sel->isfixed, 0);
+			drw_text(drw, x, 1, w, bh, lrpad / 2, m->sel->name, 0);
+			// if (m->sel->isfloating)
+			//    drw_rect(drw, x + boxs, boxs, boxw, boxw, m->sel->isfixed, 0);
 		} else {
 			drw_rect(drw, x, 0, w, bh, 1, 1);
 		}
