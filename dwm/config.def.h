@@ -83,15 +83,17 @@ static const Layout layouts[] = {
 static const char *dmenucmd[] = { "dmenu_run", "-fn", dmenufont, "-nb", nord0, "-nf", nord4, "-sb", nord3, "-sf", nord5, NULL };
 static const char *termcmd[]  = { "st", NULL };
 static const char *waterfoxcmd[]  = { "waterfox", NULL };
-static const char *mutevolcmd[] = { "pactl", "set-sink-mute", "1", "toggle", NULL };
+static const char *mutevolcmd[] = { "pactl", "set-sink-mute", "@DEFAULT_SINK@", "toggle", NULL };
 static const char *mutemiccmd[] = { "pactl", "set-source-mute", "@DEFAULT_SOURCE@", "toggle", NULL };
-static const char *volupcmd[] = { "pactl", "set-sink-volume", "1", "+5%", NULL };
-static const char *voldowncmd[] = { "pactl", "set-sink-volume", "1", "-5%", NULL };
+static const char *volupcmd[] = { "pactl", "set-sink-volume", "@DEFAULT_SINK@", "+5%", NULL };
+static const char *voldowncmd[] = { "pactl", "set-sink-volume", "@DEFAULT_SINK@", "-5%", NULL };
 static const char *brupcmd[] = { "sudo", "light", "-A", "10", NULL };
 static const char *brdowncmd[] = { "sudo", "light", "-U", "10", NULL };
+static const char *emojicmd[] = { "rofimoji", "-a", "copy", NULL };
 
 static const Key keys[] = {
     /* modifier         key                         function        argument */
+    { MODKEY,           XK_e,                       spawn,          {.v = emojicmd } },
     { MODKEY,           XK_p,                       spawn,          {.v = dmenucmd } },
     { MODKEY,           XK_w,                       spawn,          {.v = waterfoxcmd } },
     { MODKEY,           XK_Return,                  spawn,          {.v = termcmd } },
